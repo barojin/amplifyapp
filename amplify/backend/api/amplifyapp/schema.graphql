@@ -4,3 +4,47 @@ type Note @model {
   description: String
   image: String
 }
+
+type Blog @model {
+  id: ID!
+  name: String!
+  posts: [Post] @connection(name: "BlogPosts")
+}
+type Post @model {
+  id: ID!
+  title: String!
+  blog: Blog @connection(name: "BlogPosts")
+  comments: [Comment] @connection(name: "PostComments")
+}
+type Comment @model {
+  id: ID!
+  content: String
+  post: Post @connection(name: "PostComments")
+}
+
+type Profile @model {
+  id: ID!
+  firstname: String!
+  lastname: String!
+  address: String!
+  email: String!
+  intro: String
+}
+
+type Resume @model {
+  id: ID!
+  title: String
+  contents: [String]
+  company: String
+  address: String
+  fromdate: String
+  todate: String
+  link: String
+  techstack: String
+  category: CategoryInfo!
+}
+
+type CategoryInfo{
+  category: Category
+}
+enum Category { experience project skill education interest award }

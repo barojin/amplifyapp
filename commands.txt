@@ -1,2 +1,10 @@
-Hi
+amplify configure
+amplify pull --appId d2bkcuab08z8hk --envName staging
 
+amplify pull
+amplify console
+amplify push --y
+amplify add auth
+amplify add api
+amplify console api
+amplify add storage

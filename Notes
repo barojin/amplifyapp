@@ -1,4 +1,6 @@
 Error in the backend when deploy:
+messages: JSONValidationError: File project: data should NOT have additional properties: 'graphqltransformer' #6117
+reference: https://github.com/aws-amplify/amplify-cli/issues/6117
 - Set Package Version Amplify CLI to latest on AWS Amplify Console such that AWS Amplify.App settings.Build settings.Build image settings
 Error in the frontend when deploy:
 - npm install aws-amplify @aws-amplify/ui-react

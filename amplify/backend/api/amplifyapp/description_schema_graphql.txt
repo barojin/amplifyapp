@@ -1,0 +1,7 @@
+
+!: non-nullable
+
+@model: Defines top level object types in your API that are backed by Amazon DynamoDB
+
+Reference:
+if x > k
