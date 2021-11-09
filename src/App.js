@@ -3,7 +3,11 @@ import './App.css';
 import { API, Storage } from 'aws-amplify';
 import { withAuthenticator, AmplifySignOut } from '@aws-amplify/ui-react';
 import { listNotes, listProfiles, listResumes } from './graphql/queries';
-import { createNote as createNoteMutation, deleteNote as deleteNoteMutation, deleteResume } from './graphql/mutations';
+import { createNote as createNoteMutation, deleteNote as deleteNoteMutation } from './graphql/mutations';
+import { updateNote as updateNoteMutation } from './graphql/mutations';
+
+import { deleteResume as deleteResumeMutation } from './graphql/mutations';
+import { Logger } from 'aws-amplify';
 
 const initialFormState = { name: '', description: '' }
 
@@ -13,7 +17,7 @@ function App() {
   const [resumes, setResumes] = useState([]);
   const [formData, setFormData] = useState(initialFormState);
 
-// When the components loads, the useEffect hook is called and it invokes the fetchTodos function.
+// When the components loads, the useEffect hook is called and it invokes the functions contained
   useEffect(() => {
     fetchProfiles();
     fetchNotes();
@@ -26,6 +30,8 @@ function App() {
     setFormData({ ...formData, image: file.name });
     await Storage.put(file.name, file);
     fetchNotes();
+    fetchProfiles();
+    fetchResumes();
   }
 
   async function fetchProfiles() {
@@ -43,7 +49,9 @@ function App() {
 
   async function fetchResumes(){
     const apiData = await API.graphql({ query: listResumes });
-    setProfiles(apiData.data.listResumes.items);
+    // const logger = new Logger('fetchResumes');
+    // logger.error(apiData.data.listResumes.items);
+    setResumes(apiData.data.listResumes.items);
   }
 
 // Uses the Amplify API category to call the AppSync GraphQL API with the listTodos query.
@@ -80,16 +88,34 @@ function App() {
     await API.graphql({ query: deleteNoteMutation, variables: { input: { id } }});
   }
 
-  async function deleteResume({ id }) {
-    const newResumesArray = resumes.filter(resume => resume.id !== id);
-    setResumes(newResumesArray);
-    await API.graphql({ query: deleteResume, variables: { input: { id } }});
+  function ListResume(){
+    return(
+      <div style={{marginBottom: 30}}>
+      <h1>Resume</h1>
+      {logger.error(resumes)}
+      <button onClick={() => fetchResumes()}>get resume list</button>
+        {
+          resumes.map(r => (
+            <div key={r.id}>
+              <h2>{r.title}</h2>
+              <p>{r.company}</p>
+              <ul>{r.contents.map(content => <li>content</li>)}</ul>
+              <p>r.category</p>
+              {
+                r.image && <img src={r.image} style={{width: 100}} />
+              }
+            </div>
+          ))
+        }
+      </div>
+    );
   }
 
   function ListProfile(){
     return(
       <div style={{marginBottom: 30}}>
       <h1>Profile</h1>
+      <button onClick={() => fetchProfiles()}>get profile</button>
         {
           profiles.map(p => (
             <div key={p.id}>
@@ -107,24 +133,30 @@ function App() {
     );
   }
 
-  function ListResume(){
+  function ListNotes(){
     return(
       <div style={{marginBottom: 30}}>
         {
-          resumes.map(r => (
-            <div key={r.id}>
-              <h2>{r.title}</h2>
-              <p>{r.company}</p>
-              <ul>{r.contents.map(content => <li>content</li>)}</ul>
-              <p>r.category</p>
+          notes.map(note => (
+            <div key={note.id || note.name}>
+              <h2>{note.name}</h2>
+              <p>{note.description}</p>
+
+              <button onClick={() => deleteNote(note)}>Delete note</button>
+
+              {
+                note.image && <img src={note.image} style={{width: 100}} />
+              }
             </div>
           ))
         }
       </div>
-    );
+    )
   }
 
+  const logger = new Logger('App.js');
   return (
+
     <div className="App">
       <h1>Edit</h1>
       <div>
@@ -144,24 +176,27 @@ function App() {
         />
         <button onClick={createNote}>Create Note</button>
       </div>
-
       <ListProfile />
-      <ListResume />
+
       <div style={{marginBottom: 30}}>
+      <h1>Resume</h1>
+      <button onClick={() => fetchResumes()}>get resume list</button>
         {
-          notes.map(note => (
-            <div key={note.id || note.name}>
-              <h2>{note.name}</h2>
-              <p>{note.description}</p>
-              <button onClick={() => deleteNote(note)}>Delete note</button>
+          resumes.map(r => (
+            <div key={r.id}>
+              <h2>{r.title}</h2>
+              <p>Company: {r.company}</p>
+              <ul>{r.contents.map(content => <li>{content}</li>)}</ul>
+              <p>{r.category.category}</p>
               {
-                note.image && <img src={note.image} style={{width: 100}} />
+                r.image && <img src={r.image} style={{width: 100}} />
               }
             </div>
           ))
         }
       </div>
-      <AmplifySignOut />
+      <ListNotes />
+
     </div>
   );
 }
